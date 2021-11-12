@@ -1,5 +1,5 @@
 # e-ink-gauges
-C program for e-Paper to display Signal-K data using
+C code for e-Paper to display Signal-K data using
 9.7inch E-Ink display HAT for Raspberry Pi, 1200×825 resolution
 
 https://www.waveshare.com/wiki/9.7inch_e-Paper_HAT
