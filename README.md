@@ -16,3 +16,4 @@ run sudo ./myboat
 
 Tested with Raspberry Pi 4 using sample-nmea0183-data from Signal-K server.
 For RPi3/3B/3B+ check line 142 in file lib/DEV_Config.c 
+![Alt text](/pic/rileygauges.jpg?raw=true "Gauges")
