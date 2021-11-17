@@ -5,6 +5,7 @@ C code for e-Paper to display Signal-K data using
 https://www.waveshare.com/wiki/9.7inch_e-Paper_HAT
 
 Curl c library is used to get data from Signal-K server via REST API. If not installed do:
+
 sudo apt install libcurl4-openssl-dev
 
 set Signal-K server url and 'deltas' in gauges.c lines 100-112
