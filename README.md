@@ -8,11 +8,10 @@ Curl c library is used to get data from Signal-K server via REST API. If not ins
 
 sudo apt install libcurl4-openssl-dev
 
-set Signal-K server url and 'deltas' in gauges.c lines 100-112
+Set Signal-K server url and 'deltas' in gauges.c lines 109-124
 
 make
-run sudo ./myboat 
-
+run sudo ./myboat</br>
 'myboad' is defined as TARGET in Makefile
 
 Tested with Raspberry Pi 4 using sample-nmea0183-data from Signal-K server.
@@ -21,7 +20,7 @@ For RPi3/3B/3B+ check line 142 in file lib/DEV_Config.c
 Added '5 minutes to start' countdown timer.
 Instead of depth the display presents minutes and second to regatta start (there is usually enough water under starting line).<br>
 Timer is started either by pressing button or via Bluetooth connection from paired Android device using RFCOMM app, for instance Arduino Bluetooth controller in Terminal mode.<br>
-Button acts connecting shortly purple wire HRDY (8) and brown wire GDN (2) in SPI connector that comes with Pi HAT. </br> Command '5'  from Blutooth terminal starts the timer, na stops.
+Button acts connecting shortly purple wire HRDY (8) and brown wire GDN (2) in SPI connector that comes with Pi HAT. </br> Command '5'  from Blutooth terminal starts the timer, 'na' stops.
  
 There are several instructions how to make the connection, for instance: <br>
 https://iotmyway.wordpress.com/2018/10/24/connecting-raspberry-pi-3-to-android-via-blueterm/
