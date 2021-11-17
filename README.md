@@ -23,7 +23,7 @@ Instead of depth the display presents minutes and second to regatta start (there
 Timer is started either by pressing button or via Bluetooth connection from paired Android device using RFCOMM app, for instance Arduino Bluetooth controller in Terminal mode.
 Button acts connecting shortly purple wire HRDY (8) and brown wire GDN (2) in SPI connector that comes with Pi HAT.    
 
-Command '5'  fron Blutooth terminal starts the timer, na stops.
+Command '5'  from Blutooth terminal starts the timer, na stops.
  
 There are several instructions how to make the connection, for instance: 
 
@@ -33,9 +33,13 @@ Check these lines in file:
 /etc/systemd/system/dbus-org.bluez.service
 
 [Service]
+
 ExecStart=/usr/lib/bluetooth/bluetoothd -C
+
 ExecStartPost=/usr/bin/sdptool add SP
 
-To start bluetooth connection → python3 bluecom.py & in directory where myboat executable is.
+To start bluetooth connection -> python3 bluecom.py & 
+
+in directory where myboat executable is.
 
 ![Alt text](/pic/rileygauges.jpg?raw=true "Gauges")
