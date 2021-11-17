@@ -27,6 +27,7 @@ void Draw_angles(UWORD angle);
 void Draw_wind_angle(UWORD angle);
 void Draw_depth(UWORD dpt);
 void Draw_sectors(void);
+void Draw_StartClock(UWORD sec);
 void CleanCurl(void);
 
 #endif
