@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <curl/curl.h>
+#include <time.h>
 
 #include "../lib/GUI/GUI_Paint.h"
 #include "../lib/GUI/GUI_BMPfile.h"
@@ -76,10 +77,17 @@ UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr)
     UWORD Panel_Height = Dev_Info.Panel_H;
     UWORD Dynamic_Area_Width = 1200;
     UWORD Dynamic_Area_Height = 825;
+	UWORD interval = 2000;
     UDOUBLE Imagesize;
-    bool pr = true;
-	UBYTE res;
-	    
+    bool pr = true, dcounter = false, pres = false;
+	UBYTE res, button;;
+    FILE *fileStream;	    
+    char modecommand[4];		
+	unsigned int x_seconds=0;	
+	unsigned int  time_left = 0;
+	unsigned int count_down_time_in_secs = 299; //5 min mark 
+	time_t x_startTime, x_countTime;
+
     Imagesize = ((Panel_Width * 1 % 8 == 0)? (Panel_Width * 1 / 8 ): (Panel_Width * 1 / 8 + 1)) * Panel_Height;
     if((Refresh_Frame_Buf = (UBYTE *)malloc(Imagesize)) == NULL){
         Debug("Failed to apply for picture memory...\r\n");
@@ -92,29 +100,34 @@ UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr)
 	Paint_SetBitsPerPixel(1); 	
 	Paint_Clear(WHITE); 	
 	Draw_sectors();
+	EPD_IT8951_1bp_Refresh(Refresh_Frame_Buf, 0, 0, Dynamic_Area_Width, Dynamic_Area_Height, A2_Mode, Init_Target_Memory_Addr,false);
 	scurl = curl_easy_init();
 	dcurl = curl_easy_init();
 	acurl = curl_easy_init();
 	vcurl = curl_easy_init();	
 	if(scurl){
     	curl_easy_setopt(scurl, CURLOPT_URL,"http://192.168.1.109:3000/signalk/v1/api/vessels/self/navigation/speedThroughWater/value");    
-		curl_easy_setopt(scurl, CURLOPT_WRITEFUNCTION, speedFunction); 				
+		curl_easy_setopt(scurl, CURLOPT_WRITEFUNCTION, speedFunction); 	
+		curl_easy_setopt(scurl, CURLOPT_TIMEOUT,1L);			
   	}
   	if(dcurl){
 		curl_easy_setopt(dcurl, CURLOPT_URL,"http://192.168.1.109:3000/signalk/v1/api/vessels/self/environment/depth/belowTransducer/value");    
 		curl_easy_setopt(dcurl, CURLOPT_WRITEFUNCTION, depthFunction);
+		curl_easy_setopt(dcurl, CURLOPT_TIMEOUT,1L);
 	}		
 	if(vcurl){
     	curl_easy_setopt(vcurl, CURLOPT_URL, "http://192.168.1.109:3000/signalk/v1/api/vessels/self/environment/wind/speedTrue/value");    
-		curl_easy_setopt(vcurl, CURLOPT_WRITEFUNCTION, windFunction); 				
+		curl_easy_setopt(vcurl, CURLOPT_WRITEFUNCTION, windFunction);
+		curl_easy_setopt(vcurl, CURLOPT_TIMEOUT,1L);				
   	}	
   	if(acurl){
 		curl_easy_setopt(acurl, CURLOPT_URL, "http://192.168.1.109:3000/signalk/v1/api/vessels/self/environment/wind/angleApparent/value");    
 		curl_easy_setopt(acurl, CURLOPT_WRITEFUNCTION, angleFunction);
+		curl_easy_setopt(acurl, CURLOPT_TIMEOUT,1L);
 	}
-	
-	while(1){  // display values if changed		 				
-		res = curl_easy_perform(acurl);
+
+	while(1){  // display values if changed		 								
+		res = curl_easy_perform(acurl);			
 		if(res == 7){ // no data
 			wangle = 4000; 
 		}							
@@ -144,19 +157,78 @@ UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr)
 		res = curl_easy_perform(dcurl);		
 		if(res == 7){
 			depth = -1;
-		}				
-		if(depth != tdepth){
-				Draw_depth(depth);
-				tdepth = depth;
-				pr = true;
-		}				
+		}		
+		fileStream = fopen("modefile", "r");
+		fgets (modecommand, 3, fileStream);
+		fclose(fileStream);	
+		button = DEV_Digital_Read(24); //5 min to start button pressed
+		if(button == 0) pres = true;
+		if(modecommand[0] == '5' || pres){									
+			if(!dcounter){				
+				x_startTime = time(NULL);
+				Paint_ClearWindows(800, 440, 1100, 500, 0xFF);	
+				Paint_DrawString_EN(800,440,"TIME TO START", &Font24, 0x00, 0xFF);
+				dcounter = true;				
+			}
+			x_countTime = time(NULL);
+			interval = 700;               						
+			x_seconds = x_countTime - x_startTime;					
+			time_left = count_down_time_in_secs - x_seconds;
+			if(time_left < 1)
+				Draw_StartClock(1100); //display -GO					
+			else   
+				Draw_StartClock(time_left);						
+			if(x_seconds > count_down_time_in_secs + 15){ //display depth 15 sec after start
+				fileStream = fopen("modefile", "w");
+				fprintf(fileStream, "na\n");
+				fclose(fileStream);
+				pres = false;				
+			}
+			pr = true;			
+		}					
+		if(modecommand[0] != '5' && !pres){					
+			if(depth != tdepth){
+					Draw_depth(depth);
+					tdepth = depth;
+					pr = true;
+			}
+			if(dcounter){
+				interval = 2000;
+				count_down_time_in_secs = 299;
+				dcounter = false;
+				Paint_ClearWindows(800, 440, 1100, 500, 0xFF);	
+				Paint_DrawString_EN(800,440,"DEPTH  M", &Font24, 0x00, 0xFF);
+				depth = -1;
+			}
+		}	
 		if(pr){ // do refresh if changes						
 			EPD_IT8951_1bp_Refresh(Refresh_Frame_Buf, 0, 0, Dynamic_Area_Width, Dynamic_Area_Height, A2_Mode, Init_Target_Memory_Addr,false);			
 			pr = false;
-		}	
-		DEV_Delay_ms(3000);													
+		}			
+		DEV_Delay_ms(interval);			        														
 	}	
     return 0;
+}
+
+void Draw_StartClock(UWORD seconds)
+{	
+	UWORD hour, min, sec;
+	Paint_ClearWindows(670, 550, 1125, 750, 0xFF);
+	if(seconds < 1000){
+		hour = seconds/3600;
+		min = (seconds -(3600*hour))/60;
+		sec = (seconds -(3600*hour)-(min*60));		
+		Paint_DrawCircle(826, 625, 10, 0x20, DOT_PIXEL_2X2, DRAW_FILL_FULL);
+		Paint_DrawCircle(826, 675, 10, 0x20, DOT_PIXEL_2X2, DRAW_FILL_FULL);
+		Draw7segNum(670,550, min, 140);
+		Draw7segNum(985,550,(sec % 10),140);
+		Draw7segNum(835,550,(sec/10) % 10,140);
+	}
+	else{ // -GO 
+		Draw7segNum(670,550, 13, 140);
+		Draw7segNum(985,550,0,140);
+		Draw7segNum(835,550,6,140);
+	}
 }
 
 void Draw_depth(UWORD dpt)
