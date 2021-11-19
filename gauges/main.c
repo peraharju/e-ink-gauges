@@ -50,9 +50,15 @@ void  Handler(int signo){
     exit(0);
 }
 
-int main() 
-{
-    signal(SIGINT, Handler);    
+int main(int argc, char *argv[])
+{    
+    signal(SIGINT, Handler); 
+    if (argc < 2){
+        Debug("Please input Signal-K server address!\r\n");
+        Debug("Example: sudo ./myboat http://192.168.1.102:3000\r\n");
+        exit(1);
+    }
+    char* server = argv[1];         
     if(DEV_Module_Init()!=0){
         return -1;
     }
@@ -62,6 +68,6 @@ int main()
     Init_Target_Memory_Addr = Dev_Info.Memory_Addr_L | (Dev_Info.Memory_Addr_H << 16);
     A2_Mode = 6;    
 	EPD_IT8951_Clear_Refresh(Dev_Info, Init_Target_Memory_Addr, INIT_Mode);     
-    Start_Gauges(Dev_Info,Init_Target_Memory_Addr);    
+    Start_Gauges(Dev_Info, Init_Target_Memory_Addr, server);    
     return 0;
 }
