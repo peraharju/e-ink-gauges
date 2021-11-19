@@ -8,10 +8,12 @@ Curl c library is used to get data from Signal-K server via REST API. If not ins
 
 sudo apt install libcurl4-openssl-dev
 
-Set Signal-K server url and 'deltas' in gauges.c lines 109-124
+Set displayed values in gauges.c file lines 94-97
 
 make
-run sudo ./myboat</br>
+
+Give Signal-K server url as argument for runnable main method</br>
+run sudo ./myboat http://192.168.1.111:3000</br>
 'myboad' is defined as TARGET in Makefile
 
 Tested with Raspberry Pi 4 using sample-nmea0183-data from Signal-K server.
