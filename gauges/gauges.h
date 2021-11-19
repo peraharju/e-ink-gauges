@@ -18,7 +18,7 @@ extern UBYTE *Panel_Frame_Buf;
 extern UBYTE *Panel_Area_Frame_Buf;
 extern bool Four_Byte_Align;
 
-UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr);
+UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr, char* server);
 UBYTE Display_BMP(UWORD Panel_Width, UWORD Panel_Height, UDOUBLE Init_Target_Memory_Addr, UBYTE BitsPerPixel);
 void Draw_STW(UWORD spd);
 void Draw_WST(UWORD spd);

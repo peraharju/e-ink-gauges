@@ -71,7 +71,7 @@ size_t angleFunction(void* ptr, size_t size, size_t nmemb, void* data)
 }
 // end callbacks
 
-UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr)
+UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr, char* server)
 {
     UWORD Panel_Width = Dev_Info.Panel_W;
     UWORD Panel_Height = Dev_Info.Panel_H;
@@ -87,7 +87,22 @@ UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr)
 	unsigned int  time_left = 0;
 	unsigned int count_down_time_in_secs = 299; //5 min mark 
 	time_t x_startTime, x_countTime;
-
+	char scurladd[128];
+	char dcurladd[128];
+	char vcurladd[128];
+	char acurladd[128];
+	char* speedTW = "/signalk/v1/api/vessels/self/navigation/speedThroughWater/value";
+	char* depthBT = "/signalk/v1/api/vessels/self/environment/depth/belowTransducer/value";
+	char* windST = "/signalk/v1/api/vessels/self/environment/wind/speedTrue/value";
+	char* windAA = "/signalk/v1/api/vessels/self/environment/wind/angleApparent/value";
+	strncpy(scurladd, server, sizeof(scurladd));
+	strncat(scurladd, speedTW, (sizeof(scurladd) - strlen(scurladd)));	
+	strncpy(dcurladd, server, sizeof(dcurladd));
+	strncat(dcurladd, depthBT, (sizeof(dcurladd) - strlen(dcurladd)));
+	strncpy(vcurladd, server, sizeof(vcurladd));
+	strncat(vcurladd, windST, (sizeof(vcurladd) - strlen(vcurladd)));
+	strncpy(acurladd, server, sizeof(acurladd));
+	strncat(acurladd, windAA, (sizeof(acurladd) - strlen(acurladd)));
     Imagesize = ((Panel_Width * 1 % 8 == 0)? (Panel_Width * 1 / 8 ): (Panel_Width * 1 / 8 + 1)) * Panel_Height;
     if((Refresh_Frame_Buf = (UBYTE *)malloc(Imagesize)) == NULL){
         Debug("Failed to apply for picture memory...\r\n");
@@ -106,22 +121,22 @@ UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr)
 	acurl = curl_easy_init();
 	vcurl = curl_easy_init();	
 	if(scurl){
-    	curl_easy_setopt(scurl, CURLOPT_URL,"http://192.168.1.109:3000/signalk/v1/api/vessels/self/navigation/speedThroughWater/value");    
+    	curl_easy_setopt(scurl, CURLOPT_URL, scurladd);    
 		curl_easy_setopt(scurl, CURLOPT_WRITEFUNCTION, speedFunction); 	
 		curl_easy_setopt(scurl, CURLOPT_TIMEOUT,1L);			
   	}
   	if(dcurl){
-		curl_easy_setopt(dcurl, CURLOPT_URL,"http://192.168.1.109:3000/signalk/v1/api/vessels/self/environment/depth/belowTransducer/value");    
+		curl_easy_setopt(dcurl, CURLOPT_URL, dcurladd);    
 		curl_easy_setopt(dcurl, CURLOPT_WRITEFUNCTION, depthFunction);
 		curl_easy_setopt(dcurl, CURLOPT_TIMEOUT,1L);
 	}		
 	if(vcurl){
-    	curl_easy_setopt(vcurl, CURLOPT_URL, "http://192.168.1.109:3000/signalk/v1/api/vessels/self/environment/wind/speedTrue/value");    
+    	curl_easy_setopt(vcurl, CURLOPT_URL, vcurladd);    
 		curl_easy_setopt(vcurl, CURLOPT_WRITEFUNCTION, windFunction);
 		curl_easy_setopt(vcurl, CURLOPT_TIMEOUT,1L);				
   	}	
   	if(acurl){
-		curl_easy_setopt(acurl, CURLOPT_URL, "http://192.168.1.109:3000/signalk/v1/api/vessels/self/environment/wind/angleApparent/value");    
+		curl_easy_setopt(acurl, CURLOPT_URL, acurladd);    
 		curl_easy_setopt(acurl, CURLOPT_WRITEFUNCTION, angleFunction);
 		curl_easy_setopt(acurl, CURLOPT_TIMEOUT,1L);
 	}
@@ -178,7 +193,7 @@ UBYTE Start_Gauges(IT8951_Dev_Info Dev_Info, UDOUBLE Init_Target_Memory_Addr)
 				Draw_StartClock(1100); //display -GO					
 			else   
 				Draw_StartClock(time_left);						
-			if(x_seconds > count_down_time_in_secs + 15){ //display depth 15 sec after start
+			if(x_seconds > count_down_time_in_secs + 60){ //display depth 1 min after start
 				fileStream = fopen("modefile", "w");
 				fprintf(fileStream, "na\n");
 				fclose(fileStream);
