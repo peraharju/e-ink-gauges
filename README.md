@@ -14,7 +14,7 @@ make
 
 Give Signal-K server url as argument for runnable main method</br>
 run sudo ./myboat http://192.168.1.111:3000</br>
-'myboad' is defined as TARGET in Makefile
+'myboat' is defined as TARGET in Makefile
 
 Tested with Raspberry Pi 4 and Zero 2W using sample-nmea0183-data from Signal-K server.
 For RPi3/3B/3B+ check line 142 in file lib/Config/DEV_Config.c </br>
