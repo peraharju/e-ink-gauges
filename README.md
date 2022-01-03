@@ -16,8 +16,10 @@ Give Signal-K server url as argument for runnable main method</br>
 run sudo ./myboat http://192.168.1.111:3000</br>
 'myboad' is defined as TARGET in Makefile
 
-Tested with Raspberry Pi 4 using sample-nmea0183-data from Signal-K server.
-For RPi3/3B/3B+ check line 142 in file lib/DEV_Config.c 
+Tested with Raspberry Pi 4 and Zero 2W using sample-nmea0183-data from Signal-K server.
+For RPi3/3B/3B+ check line 142 in file lib/Config/DEV_Config.c </br>
+bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_32);   //For RPi 4 and Zero 2 </br>
+Current consumption of Pi Zero with display updating is about 190 mA, less than half of RPI 4.
 
 Added '5 minutes to start' countdown timer.
 Instead of depth the display presents minutes and second to regatta start (there is usually enough water under starting line).<br>
